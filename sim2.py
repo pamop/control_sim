@@ -100,7 +100,7 @@ plt.ylabel('average reward')
 plt.legend(('LR=0.01','LR=0.1','LR=1.0'),loc='lower right')
 
 #plt.plot(actions[1,:],'o')
-plt.plot(np.mean(actions,axis=0),'o')
+#plt.plot(np.mean(actions,axis=0),'o')
 
 ## hist
 #observations = [range(10),range(20),range(50),range(200)]
