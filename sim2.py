@@ -20,8 +20,8 @@ M[:numM,:numM] = np.identity(numM)
 R = [0.3,0,0,0,0.7] #[0,0.2,0.23,0.27,0.3] # Sum to 1
 c = 0.8
 
-ntrials = 200
-nsubj = 300
+ntrials = 20
+nsubj = 2
 
 cbar = (1-c)/(L-1)
 C = cbar * np.ones([L,L])

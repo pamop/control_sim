@@ -11,33 +11,8 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import time
 
-# Task parameters
-nactions = 5
-noutcomes = nactions
-L = nactions # variable name in paper
-M = np.zeros([L,L])
-numM = 5 # |M|
-M[:numM,:numM] = np.identity(numM)
-R = [0.3,0,0,0,0.7] #[0,0.2,0.23,0.27,0.3] # Sum to 1
-c = 0.8
-
-ntrials = 200
-nsubj = 300
-
-cbar = (1-c)/(L-1)
-C = cbar * np.ones([L,L])
-for idx in range(0,L):
-    if sum(M[:,idx]) == 0:
-        C[:,idx] = 1/L
-
-Mbool = M.astype(bool)
-C[Mbool] = c
-
-
-    
-
-class simsubj(object):
-    'Simulated subject'
+class RLagent(object):
+    'Simulated RL subject'
     
     def __init__(self,L,alpha,beta):
         self.Q = np.ones(L) / L
@@ -56,79 +31,90 @@ class simsubj(object):
         return a
 
     def updateQ(self,action,trial_rwd):
-        self.Q[action] = self.Q[action] + alpha * (trial_rwd - self.Q[action])
+        self.Q[action] = self.Q[action] + self.alpha * (trial_rwd - self.Q[action])
         
+class robotagent(object):
+    'Simulated robot agent'
+    
+    def __init__(self,L):
+        self.L = L        
         
-# Run simulated experiment
-nLRcases = 3
-avgrwd = np.zeros([nLRcases,ntrials]) 
- 
-for LRcase in range(0,nLRcases):  
-    
-    
-    actions = np.zeros([nsubj,ntrials])
-    outcomes = np.zeros([nsubj,ntrials])
-    trial_rwds = np.zeros([nsubj,ntrials])
-    
-    for subject in range(0,nsubj):
-        # Simulated subject parameters
-        alpha = 0.01 * 10**LRcase
-        beta = 0.01
-        subj = simsubj(L,alpha,beta)
-    
-    
-        for trial in range(0,ntrials):
-            # Subject makes choice    
-            a = subj.choose_action(trial)
-            
-            # One of L outcomes occurs
-            outcome = np.random.choice(np.arange(L),p=C[:,a])
-            trial_rwd = R[outcome]
-            
-            subj.updateQ(a,trial_rwd)
+    def choose_action(self,trial):
+        a = trial%L
+        return a
+
+class omniscientagent(object):
+    'Simulated omniscient agent'
+    def __init__(self,R):
+        self.R = R
         
-            # Save what the subject did    
-            actions[subject,trial] = a
-            outcomes[subject,trial] = outcome
-            trial_rwds[subject,trial] = trial_rwd
-            
-    avgrwd[LRcase,:] = np.mean(trial_rwds,axis=0)
+    def choose_action(self,trial):
+        a = np.argmax(R)
+        return a
+
+def runexpt(R,V,ntrials):
+    # Run simulated experiment
+    L = len(R)
+    alpha = 0.008
+    beta = 0.1
+    RLsubj = RLagent(L,alpha,beta)
+    robot = robotagent(L)
+    omniagent = omniscientagent(R)
     
-# Visualize
-plt.plot(avgrwd[0,:],'ro',avgrwd[1,:],'bo',avgrwd[2,:],'go')
-plt.xlabel('trial')
-plt.ylabel('average reward')
-plt.legend(('LR=0.01','LR=0.1','LR=1.0'),loc='lower right')
+    # Expected rewards
+    E_RL,E_robot,E_omni = 0,0,0
+    a_RL,a_robot,a_omni = np.zeros(ntrials),np.zeros(ntrials),np.zeros(ntrials)
+    
+    for trial in range(0,ntrials):
+        #RL
+        a = RLsubj.choose_action(trial)
+        trial_rwd = np.round(np.random.normal(R[a],np.sqrt(V[a]))) #deterministic
+        RLsubj.updateQ(a,trial_rwd)
+        E_RL += trial_rwd
+        a_RL[trial] = a
+        
+        #Robot
+        a = robot.choose_action(trial)
+        E_robot += np.round(np.random.normal(R[a],np.sqrt(V[a])))
+        a_robot[trial] = a        
+        
+        #Omni
+        a = omniagent.choose_action(trial)
+        E_omni += np.round(np.random.normal(R[a],np.sqrt(V[a])))
+        a_omni[trial] = a
+    
+    # Visualize
+    plt.bar([1,2,3],[E_robot,E_RL,E_omni])
+    #plt.plot(avgrwd[0,:],'ro',avgrwd[1,:],'bo',avgrwd[2,:],'go')
+    plt.xlabel('robot, RL, omniscient agent')
+    plt.ylabel('reward earned')
+    plt.show()
+    
+    x = np.arange(1,ntrials + 1)
+    plt.plot(x,a_RL+1,'bo-',x,a_robot+1,'go-',x,a_omni+1,'ro-')
+    plt.legend(['RL','robot','omni'])
+    plt.xlabel('trial number')
+    plt.ylabel('action chosen')
+    plt.show()
 
-#plt.plot(actions[1,:],'o')
-#plt.plot(np.mean(actions,axis=0),'o')
+# Task parameters
+nactions = 6
+L = nactions # variable name in paper
 
-## hist
-#observations = [range(10),range(20),range(50),range(200)]
-#filenames = []
-#for ii in range(0,4):
-##    subjhist, edges = np.histogram(actions[:,ii*50:ii*50+49],bins=[0, 1, 2, 3, 4])
-#    plt.hist(actions[1,observations[ii]],bins=5)
-#    fname = 'hist' + str(ii)
-#    filenames.append(fname)
-#    plt.title('|M|=4,LR=1')
-#    plt.savefig(fname)
-#    plt.cla()
-##    time.sleep(1)
+# Environ 1: No w/in variance, all between
+R = [3,7,6,4,3,1] #mean = 4, variance = 24
+V = [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001] #each action deterministically leads to that reward
 
+ntrials = 20
+#nsubj = 300
 
-#filenames = []
-#for ii in range(0,4):
-#    plt.hist(np.mean(actions[:,ii*50:ii*50 + 49],axis=0),bins=5)
-#    fname = 'hist' + str(ii)
-#    filenames.append(fname)
-#    plt.savefig(fname)
-#    plt.cla()
-#
-##stats.binned_statistic(np.ones(ntrials), np.mean(actions,axis=0), 'mean', bins=20)
-#
-#import imageio
-#images = []
-#for filename in filenames:
-#    images.append(imageio.imread(filename))
-#imageio.mimsave('/Users/pamop/Documents/gureckis lab/control_sim/test.gif', images)
+runexpt(R,V,ntrials)
+
+# Environ 2: No w/in variance, all between
+R = [9,9,9,9,9,9] #reward mean = 9, variance = 24 (std = 4.9)
+V = [24,24,24,24,24,24] #variance
+
+ntrials = 20
+#nsubj = 300
+runexpt(R,V,ntrials)
+
