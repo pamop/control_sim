@@ -1,0 +1,68 @@
+<!--WRAPPER-->
+<div id="container-instructions">
+
+    <div class="header">
+        <!--TITLE--><h1>Comprehension Check</h1><!--END TITLE-->
+        <!--DESCRIPTION--><span></span><!-- END DESCRIPTION-->
+    </div>
+    <!--END HEADER-->
+
+    <div class="instructions well">
+        <p id="toptext">
+            Before beginning the experiment, you must answer a few simple
+            questions to ensure you have read the instructions. If you do not
+            answer all questions correctly, you will be returned to the start of
+            the instructions and have a chance to retake this quiz.
+        </p>
+        <form id="prequiz" action="debrief" method="post">
+
+            <div class="question">
+                <p class="questiontext">
+                    Does each forest have the same six groves?
+                    <select id="grovessame" name="grovessame" class="form-control">
+                        <option value="noresp" SELECTED></option>
+	                      <option value="yes">Each forest has the same six groves</option>
+	                      <option value="no">Each forest has six new groves</option>
+                    </select>
+                </p>
+            </div>
+            <div class="question">
+                <p class="questiontext">
+                    How many bird watching trips will you make on each expedition?
+                    <select id="numtrips" name="numtrips" class="form-control">
+                        <option value="noresp" SELECTED></option>
+	                      <option value="one">One trip</option>
+	                      <option value="thirty">30 trips</option>
+	                      <option value="hundred">100 trips</option>
+                    </select>
+                </p>
+            </div>
+            <div class="question">
+                <p class="questiontext">
+                    How are the bird species distributed in each forest?
+                    <select id="distribution" name="distribution" class="form-control">
+                        <option value="noresp" SELECTED></option>
+	                      <option value="preferred">Each species has a preferred grove.</option>
+	                      <option value="somepreferred">Some species may have a preferred grove, and some may appear randomly throughout the six groves.</option>
+                    </select>
+                </p>
+            </div>
+            <div class="question">
+                <p class="questiontext">
+                    What is your goal?
+                    <select id="goal" name="goal" class="form-control">
+                        <option value="noresp" SELECTED></option>
+	                      <option value="redbirds">To see the most redbirds</option>
+                        <option value="most">To spot the most total birds</option>
+	                      <option value="equal">To spot an equal number of each species of bird</option>
+                    </select>
+                </p>
+            </div>
+        </form>
+
+    </div>
+    <!--END CONTENT-->
+    <!-- BUTTONS-->
+
+    <button type="button" id="continue" class="btn btn-success btn-lg continue"> Submit </button>
+</div>

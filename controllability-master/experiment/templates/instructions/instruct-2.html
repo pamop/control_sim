@@ -1,0 +1,60 @@
+<div id="container-instructions">
+
+    <h1>Instructions</h1>
+
+    <hr>
+
+    <div class="instructions well">
+
+        <p>
+            Whenever you visit a grove, there are three bird species you might
+            spot: bluebirds, greenbirds, and redbirds. On any one trip you may
+            spot zero species, one species, or multiple species. Your goal is to
+            spot as many bird species as you can on each trip.
+        </p>
+
+        <p>
+            Some bird species may tend to prefer a single grove, while others
+            may appear randomly throughout the six groves in a forest. Some
+            species may appear more often in some forests than in other forests.
+            The three species ignore each other, so the presence of one bird
+            species won't make another one more or less likely to appear.
+        </p>
+
+        <center>
+            <img width="600px" src="/static/images/instruct_postchoice.png">
+        </center>
+
+        <p>
+        Each time you choose a grove, the "trips in forest" counter will
+        decrease by one, the birds you've spotted will be displayed below the
+        grove icons, and the "birds spotted" counter will increase by the number
+        of species spotted on that trip. The "trips in forest" and "birds
+        spotted" counters will reset on each expedition to a new forest. At the
+        end of the game, one of your expeditions will be chosen at random and you
+        will receive a cash bonus based on the number of total birds spotted on
+        that expedition. The birds spotted are converted to money at a rate of one cent
+        per bird.
+
+        </p>
+    </div>
+
+    <hr>
+
+    <div class="instructionsnav">
+        <div class="row">
+            <div class="col-xs-2">
+                <button type="button" id="next" value="next" class="btn btn-primary btn-lg previous">
+                <span class="glyphicon glyphicon-arrow-left"></span> Previous
+                </button>
+            </div>
+            <div class="col-xs-7">
+            </div>
+            <div class="col-xs-3">
+	              <button type="button" id="next" value="next" class="btn btn-success btn-lg continue">
+	                  Begin experiment <span class="glyphicon glyphicon-arrow-right"></span>
+	              </button>
+            </div>
+        </div>
+    </div>
+</div>
