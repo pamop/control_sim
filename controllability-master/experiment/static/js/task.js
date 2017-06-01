@@ -13,10 +13,12 @@ var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode),
         skipinstr: true,
         condition: parseInt(condition),
         counterbalance: parseInt(counterbalance),
-        dims: 3,
-        options: 6,
-        nblocks: 10,
-        trialsperblock: 30,
+        nactions: 6,
+        std_bw: [0,1,2],
+        std_wi: [0,1,2],
+        rwdmean: 20,
+        nblocks: 9,
+        trialsperblock: 20,
         pages: [
             "instructions/instruct-1.html",
             "instructions/instruct-2.html",
@@ -77,6 +79,7 @@ function quiz(instructions, callback) {
     });
 }
 
+
 function decisionProblem(params, callback) {
     "use strict";
     var stage,
@@ -85,12 +88,21 @@ function decisionProblem(params, callback) {
         rewardgroups,
         actions,
         score = 0,
-        actionmeans = params.actionmeans,
+        R = params.R,
+        V = params.V,
         ntrials = params.trials,
         trial = 0,
         rtTime,
         names = ["green", "blue", "red"],
         colors = ["green", "blue", "red"];
+
+    function paytoplay() {
+
+    }
+
+    function choicetask(params, callback){
+    
+    }
 
     function setupPage() {
         stage = d3.select("body").select("svg");
@@ -262,7 +274,7 @@ function decisionProblem(params, callback) {
         }
     }
 
-    psiTurk.showPage("stage.html");
+    psiTurk.showPage("stage.html"); // Blank page for waiting
     setTimeout(setupPage, 1000);
 }
 
@@ -320,7 +332,6 @@ function questionnaire() {
             },
             error: promptResubmit});
     });
-
 }
 
 function experimentDriver() {
@@ -330,32 +341,46 @@ function experimentDriver() {
         paramsList = [];
 
     runNext = function () {
-        var nextFun = functionList.shift();
-        if (functionList.length === 0) {
+        var nextFun = functionList.shift(); // nextFun takes the first fn off the list
+        if (functionList.length === 0) { // If nextFun was the last fn, it is questionnaire
             nextFun();
         } else {
+            // The next function will be decision problem, which requires the inputs params and callback
             nextFun(paramsList.shift(), runNext);
         }
     };
 
     $.ajax({
         dataType: "json",
-        url: "/get_stims",
+        url: "/get_stims", // See custom.py (line 73) and stimuligenerator.py
         data: {condition: EXP.condition,
                counterbalance: EXP.counterbalance,
-               dims: EXP.dims,
-               options: EXP.options,
+               nactions: EXP.nactions,
+               std_bw: EXP.std_bw,
+               std_wi: EXP.std_wi,
+               rwdmean: EXP.rwdmean,
                nblocks: EXP.nblocks,
                trialsperblock: EXP.trialsperblock
               },
         success: function (data) {
-            EXP.stimuli = data.results;
-            console.log(EXP.stimuli);
+            EXP.stimuli = data.results; // See custom.py (line 83) 
+            /** now EXP.stimuli contains output of stimuligenerator which is:
+            {"R": R,
+             "V": V,
+             "sbw": sbw,
+             "swi": swi,
+             "rwdmean":rwdmean,
+             "trials": trialsperblock,
+             "block": i,
+            }
+            for each block.
+            **/
             console.log(EXP.stimuli);
             paramsList = EXP.stimuli;
+            // In below line: EXP.stimuli.length = number of blocks with params to run experiment 
             functionList = _.map(_.range(EXP.stimuli.length), function () {return decisionProblem; });
-            functionList.push(questionnaire);
-            runNext();
+            functionList.push(questionnaire); // qstnre is at bottom of list, last fn to execute
+            runNext(); // Runs fn on top of stack (either decisionproblem or questionnaire)
         }
     });
 }

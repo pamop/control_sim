@@ -76,8 +76,10 @@ def get_stims():
     #get all the parameters for the stim generator from the request
     trials = stimuli_generator.create_stimuli(int(request.args['condition']),
                                               int(request.args['counterbalance']),
-                                              int(request.args['dims']),
-                                              int(request.args['options']),
+                                              int(request.args['nactions']),
+                                              int(request.args['std_bw']),
+                                              int(request.args['std_wi']),
+                                              int(request.args['rwdmean']),
                                               int(request.args['nblocks']),
                                               int(request.args['trialsperblock']))
     return jsonify(results=trials)

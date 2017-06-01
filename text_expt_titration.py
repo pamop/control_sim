@@ -80,10 +80,17 @@ allact = np.zeros([25, ntrials])
 allsig = np.zeros([25,2])
 
 for i in range(0,25):
-    swin, sbw= np.random.choice([1e-15,1,2,3,4]), np.random.choice([1e-15,1,2,3,4])
-    while resparr[int(sbw),int(swin)] != 0:
-        swin, sbw= np.random.choice([1e-15,1,2,3,4]), np.random.choice([1e-15,1,2,3,4])
-    
+#    swin, sbw= np.random.choice([1e-15,1,2,3,4]), np.random.choice([1e-15,1,2,3,4])
+#    while resparr[int(sbw),int(swin)] != 0:
+#        swin, sbw= np.random.choice([1e-15,1,2,3,4]), np.random.choice([1e-15,1,2,3,4])
+#    
+    stdperm = np.array(np.meshgrid([1e-15,1,2,3,4],[1e-15,1,2,3,4])).T.reshape(-1,2)
+    if len(stdperm) > nblocks:
+        print('fewer blocks than std bw/wi permutations')
+    else:
+        while len(stdperm) < nblocks:
+            stdperm = np.concatenate((stdperm,stdperm))
+
     x = np.random.normal(0,1,n)
     x = x * round(sbw) / np.std(x)
     x = x - np.mean(x) + pointmean
