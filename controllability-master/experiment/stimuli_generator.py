@@ -22,7 +22,7 @@ def create_stimuli(condition, counterbalance, nactions=6, std_bw = [0,1,2,3], st
         sbw, swi = stdperm[i,0], stdperm[i,1]
         R = R * round(sbw) / np.std(np.random.normal(0,1,nactions)
         R = np.round(R - np.mean(R) + rwdmean)
-        V = swi**2 * np.ones(nactions)
+        V = swi**2 * np.ones(nactions) # Variance 
 
         exp_definition.append(
             {"R": R,

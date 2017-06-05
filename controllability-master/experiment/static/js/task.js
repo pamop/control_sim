@@ -88,21 +88,23 @@ function decisionProblem(params, callback) {
         rewardgroups,
         actions,
         score = 0,
+        RV = [params.R,params.V],
         R = params.R,
         V = params.V,
         ntrials = params.trials,
         trial = 0,
-        rtTime,
-        names = ["green", "blue", "red"],
-        colors = ["green", "blue", "red"];
+        rtTime;
 
-    function paytoplay() {
+    var rewardstodate = []; 
+    for(var a = 0; a < R.length; a++) { rewardstodate.push([]);}
 
-    }
+    // function paytoplay() {
 
-    function choicetask(params, callback){
+    // }
+
+    // function choicetask(params, callback){
     
-    }
+    // }
 
     function setupPage() {
         stage = d3.select("body").select("svg");
@@ -112,112 +114,122 @@ function decisionProblem(params, callback) {
             .style("font", "20px monospace");
 
         actiongroups = stage.selectAll(".actionGroup")
-            .data(actionmeans)
+            .data(RV)
             .enter()
-            .append("g")
+            .append("g") // g for group
             .attr("id", function(d, i) {return "actgroup" + i; })
             .attr("transform", function(d, i) {
-                return "translate(" + (50 + 150 * Math.floor(i / 2)) + ", " + (40 + 130 * (i % 2)) + ")";
+                return "translate(" + (50 + 110 * i) + ", " + (50) + ")"; // N actions horizontally spread across screen
             });
 
 
         actions = actiongroups.append("image")
             .attr("id", function(d, i) {return "action" + i; })
             .attr("class", "action")
-            .attr("xlink:href", "static/images/0810.png")
-            .attr({width: 100, height: 102});
+            .attr("xlink:href", "static/images/0810.png") // Tree image for each action
+            .attr({width: 100, height: 102}); // Pixel size of image
 
         actiongroups.append("text")
-            .text(function(d, i) {return "Grove " + (i + 1); })
+            .text(function(d, i) {return "Grove " + (i + 1); }) // Text labeling each grove
             .attr("x", "20")
-            .attr("y", "115");
+            .attr("y", "115"); // Distance from topleft corner of each action group (height of img + 13)
 
-        stage.append("g")
-            .attr("id", "scoregroup")
-            .attr("transform", "translate(500, 60)")
-            .append("text")
-            .text("Birds spotted:")
-            .style("font", "24px monospace");
-
-        stage.append("g")
-            .attr("id", "trialsgroup") .attr("transform", "translate(500, 150)")
-            .append("text")
-            .text("Trips in forest:")
-            .style("font", "24px monospace");
-
-        d3.select("#scoregroup")
-            .append("text")
-            .text("0")
-            .attr("id", "score")
-            .attr("y", 30)
-            .style("font", "30px monospace");
-
-        d3.select("#trialsgroup")
-            .append("text")
-            .text(ntrials - trial)
-            .attr("id", "trial")
-            .attr("y", 30)
-            .style("font", "30px monospace");
-
-        rewardgroups = stage.append("g")
-            .attr("transform", "translate(120, 360)")
-            .selectAll(".rewardGroup")
-            .data(names)
+        rwdgroups = stage.append('g')
+            .selectAll('g')                 
+            .data(rewardstodate)
             .enter()
-            .append("g")
-            .attr("class", "rewardGroup")
-            .attr("transform", function(e, j) {
-                return "translate(" + (120 * j) + ", 0)";
-            });
+            .append('g')
+            .selectAll('circle')
+            .data( function(d,i,j) { return d; } )
+            .enter()
+            .append('circle')
+            .attr({
+                r:20,
+                cx: function(d,i,j) { return (j * 110) + 50; },
+                cy: function(d,i,j) { return (i * 45) + 175; },
+                fill: "#BADBDA",
+                stroke: "#2F3550",
+                'stroke-width': 2
+        });
 
-        rewardgroups.append("text")
-            .style("font-size", "20px")
-            .style("fill", function(e) {return e; })
-            .attr("y", 30)
-            .attr({"text-anchor": "end"})
-            .text(function(e, j) {return names[j]; });
+        rwdtext = stage.append('g') //removing
+            .selectAll('g') 
+            .data(rewardstodate)
+            .enter()
+            .append('g')
+            .selectAll('text') // these
+            .data( function(d,i,j) { return d; } ) //lines
+            .enter() //text displays normally
+            .append('text')
+            .text( function(d,i,j) { return d; } )
+            .attr('x', function(d,i,j) { return (j * 110) + 50; })
+            .attr('y', function(d,i,j) { return (i * 45) + 175; })
+            .style('font', '20px monospace');
 
         next();
     }
 
 
     function responseFn(d, i) {
-        var rewards,
-            rewarddisplays,
+        // When responseFn is called on action item i, d is RV
+        var reward,
+            rewardstodate,
             trialdata,
             i,
             j;
-        actions.on("click", function () {});
+        actions.on("click", function () {}); // Listens for click on one of the actions
         d3.select("#action" + i)
-            .attr("xlink:href", "static/images/0110.gif");
-        message.style("fill", "lightgray");
+            .attr("xlink:href", "static/images/0110.gif"); // turn chosen tree orange
+        message.style("fill", "lightgray"); // Makes "Choose a grove" text gray
 
-        rewards = _.zip(d, colors).map(function(x) {
-            return [Math.random() < x[0] ? 1 : 0, x[1]];
-        });
+        // rewards = _.zip(d, colors).map(function(x) { // d is the probs for each associated color
+        //     return [Math.random() < x[0] ? 1 : 0, x[1]]; // random existence of each color bird based on d
+        // });
 
-        rewarddisplays = rewardgroups.append("g")
-            .data(rewards);
-        rewarddisplays.each(function (e) {
-            if (e[0] === 1) {
-                d3.select(this).append("image")
-                    .attr("xlink:href", function(f) {return "static/images/" + f[1] + "bird.png"; })
-                    .attr({x: -60, y: -60, width: 80, height: 80});
-            }
-        });
+        //Box-Muller method for sampling from normal (Gaussian) distribution
+        normsample = Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
+        reward = normsample * Math.sqrt(d[1][i]) + d[0][i]; // Transform w proper var and mean
 
-        score = score + _.reduce(rewards, function(a, b) {return a + b[0]; }, 0);
-        d3.select("#score")
-            .text(score.toString());
+        // // Update choices and reward displays
+        // var rewarddisplays = rewardgroups.append("g")
+        //     .data(rewards);
+        // rewarddisplays.each(function (f,k) {
+        //     if k === i {
+        //         d3.select(this).append('circle')
+        //         .attr({
+        //         r:25,
+        //         cx: 0,
+        //         cy: 0,
+        //         fill: "#BADBDA",
+        //         stroke: "#2F3550",
+        //         'stroke-width': 2
+        //     });
+        //     var label = rewarddisplays.append("text")
+        //         .text(reward)
+        //         .style("font", "20px monospace")
+        //         .attr({
+        //             "alignment-baseline": "middle",
+        //             "text-anchor": "middle"
+        //         })     
+        //     }
+        
 
-        d3.select("#trial")
-            .text((ntrials - trial).toString());
+        score = score + reward;
+        rewardstodate[i].push(reward)
+        // d3.select("#score")
+        //     .text(score.toString()); // Replace prev score with new score
 
-        rewarddisplays.transition()
-            .delay(1000)
-            .duration(200)
-            .style("opacity", 0)
-            .remove();
+        // d3.select("#trial")
+        //     .text((ntrials - trial).toString()); // Replace num trials remaining
+        scoredisplay = stage.append('text')
+            .attr({x: 170, y: 20})
+            .text("Reward: " + reward.toString())
+            .style("font", "20px monospace");
+        scoredisplay.transition()
+             .delay(1000)
+             .duration(200)
+             .style("opacity", 0)
+             .remove();
 
         setTimeout( function () {
             d3.select("#action" + i)
@@ -232,15 +244,13 @@ function decisionProblem(params, callback) {
             block: params.block,
             blocktrial: trial,
             response: i,
-            reward0: rewards[0][0],
-            reward1: rewards[1][0],
-            reward2: rewards[2][0],
-            bestresponse0: params.outcomepairs[0],
-            bestresponse1: params.outcomepairs[1],
-            bestresponse2: params.outcomepairs[2],
-            proportion0: params.proportions[0],
-            proportion1: params.proportions[1],
-            proportion2: params.proportions[2],
+            reward: reward,
+            rewardstodate: rewardstodate,
+            R: params.R,
+            V: params.V,
+            swi: params.swi,
+            sbw: params.sbw,
+            rwdmean: params.rwdmean,
             globaltrial: params.block * EXP.trialsperblock + trial,
             rt: new Date().getTime() - rtTime,
             score: score
@@ -249,7 +259,7 @@ function decisionProblem(params, callback) {
         psiTurk.recordTrialData(trialdata);
 
 
-
+        // Wait 1200ms before beginning next trial
         setTimeout(next, 1200);
     }
 
@@ -258,16 +268,17 @@ function decisionProblem(params, callback) {
         setTimeout(callback, 5000);
     }
 
+    // *** Will change this part for paytoplay portion 
     function next() {
         trial += 1;
 
-        if (trial > ntrials) {
-            if (params.block < EXP.nblocks - 1) {
+        if (trial > ntrials) { // if end of block
+            if (params.block < EXP.nblocks - 1) { // if end of experiment
                 transition();
             } else {
                 callback();
             }
-        } else {
+        } else { // do trial: wait for click on actions, do responseFn, 
             actions.on("click", function (d, i) {responseFn(d, i); });
             message.style("fill", "black");
             rtTime = new Date().getTime();
@@ -364,7 +375,7 @@ function experimentDriver() {
               },
         success: function (data) {
             EXP.stimuli = data.results; // See custom.py (line 83) 
-            /** now EXP.stimuli contains output of stimuligenerator which is:
+            /** now EXP.stimuli contains output of stimuligenerator which is array:
             {"R": R,
              "V": V,
              "sbw": sbw,
