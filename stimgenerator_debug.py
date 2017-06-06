@@ -1,4 +1,4 @@
-#import random
+# -*- coding: utf-8 -*-
 from math import floor
 import numpy as np
 
@@ -37,3 +37,6 @@ def create_stimuli(condition, counterbalance, nactions=6, std_bw=3, std_wi=3, rw
         )
 
     return exp_definition
+
+    
+stims= create_stimuli(1,3,6,2,2,20,9,20)

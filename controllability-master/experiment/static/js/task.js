@@ -11,11 +11,11 @@
 var psiTurk = new PsiTurk(uniqueId, adServerLoc, mode),
     EXP = {
         skipinstr: true,
-        condition: parseInt(condition),
-        counterbalance: parseInt(counterbalance),
+        condition: 0,
+        counterbalance: 1,
         nactions: 6,
-        std_bw: [0,1,2],
-        std_wi: [0,1,2],
+        std_bw: 2,
+        std_wi: 2,
         rwdmean: 20,
         nblocks: 9,
         trialsperblock: 20,
@@ -86,16 +86,18 @@ function decisionProblem(params, callback) {
         message,
         actiongroups,
         rewardgroups,
+        rwdtext,
         actions,
         score = 0,
-        RV = [params.R,params.V],
+        rewardstodate = [],
         R = params.R,
         V = params.V,
+        //RV = _.zip.apply(_,[params.R,params.V]), // Transpose of R V 
+        RV = [params.R,params.V],
         ntrials = params.trials,
         trial = 0,
         rtTime;
 
-    var rewardstodate = []; 
     for(var a = 0; a < R.length; a++) { rewardstodate.push([]);}
 
     // function paytoplay() {
@@ -117,24 +119,24 @@ function decisionProblem(params, callback) {
             .data(RV)
             .enter()
             .append("g") // g for group
-            .attr("id", function(d, i) {return "actgroup" + i; })
-            .attr("transform", function(d, i) {
+            .attr("id", function(d, i, j) {return "actgroup" + i; })
+            .attr("transform", function(d, i, j) {
                 return "translate(" + (50 + 110 * i) + ", " + (50) + ")"; // N actions horizontally spread across screen
             });
 
 
         actions = actiongroups.append("image")
-            .attr("id", function(d, i) {return "action" + i; })
+            .attr("id", function(d, i, j) {return "action" + i; })
             .attr("class", "action")
             .attr("xlink:href", "static/images/0810.png") // Tree image for each action
             .attr({width: 100, height: 102}); // Pixel size of image
 
         actiongroups.append("text")
-            .text(function(d, i) {return "Grove " + (i + 1); }) // Text labeling each grove
+            .text(function(d, i, j) {return "Grove " + (i + 1); }) // Text labeling each grove
             .attr("x", "20")
             .attr("y", "115"); // Distance from topleft corner of each action group (height of img + 13)
 
-        rwdgroups = stage.append('g')
+        rewardgroups = stage.append('g')
             .selectAll('g')                 
             .data(rewardstodate)
             .enter()
@@ -170,10 +172,11 @@ function decisionProblem(params, callback) {
     }
 
 
-    function responseFn(d, i) {
+    function responseFn(d, i, j) {
         // When responseFn is called on action item i, d is RV
         var reward,
             rewardstodate,
+            scoredisplay,
             trialdata,
             i,
             j;
@@ -187,8 +190,8 @@ function decisionProblem(params, callback) {
         // });
 
         //Box-Muller method for sampling from normal (Gaussian) distribution
-        normsample = Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
-        reward = normsample * Math.sqrt(d[1][i]) + d[0][i]; // Transform w proper var and mean
+        reward = Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
+        reward = reward * Math.sqrt(d[1][i]) + d[0][i]; // Transform w proper var and mean
 
         // // Update choices and reward displays
         // var rewarddisplays = rewardgroups.append("g")
@@ -279,7 +282,7 @@ function decisionProblem(params, callback) {
                 callback();
             }
         } else { // do trial: wait for click on actions, do responseFn, 
-            actions.on("click", function (d, i) {responseFn(d, i); });
+            actions.on("click", function (d, i, j) {responseFn(d, i, j); });
             message.style("fill", "black");
             rtTime = new Date().getTime();
         }
