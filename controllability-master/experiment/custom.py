@@ -77,8 +77,8 @@ def get_stims():
     trials = stimuli_generator.create_stimuli(int(request.args['condition']),
                                               int(request.args['counterbalance']),
                                               int(request.args['nactions']),
-                                              int(request.args['std_bw']),
-                                              int(request.args['std_wi']),
+                                              request.args['std_bw'],
+                                              request.args['std_wi'],
                                               int(request.args['rwdmean']),
                                               int(request.args['nblocks']),
                                               int(request.args['trialsperblock']))

@@ -1,13 +1,16 @@
 #import random
 from math import floor
 import numpy as np
+import json
 
-def create_stimuli(condition, counterbalance, nactions=6, std_bw=3, std_wi=3, rwdmean=20, nblocks=16, trialsperblock=20):
+def create_stimuli(condition, counterbalance, nactions=6, std_bw='[0,1,2,3]', std_wi='[0,1,2,3]', rwdmean=20, nblocks=16, trialsperblock=20):
     exp_definition = []
-    t_bw = np.arange(std_bw + 1)
-    t_wi = np.arange(std_wi + 1)
-    t_bw[t_bw==0] = 1e-9
-    t_wi[t_wi==0] = 1e-6
+    # t_bw = np.arange(std_bw + 1)
+    # t_wi = np.arange(std_wi + 1)
+    std_bw = json.loads(std_bw)
+    std_wi = json.loads(std_wi)
+    std_bw[std_bw==0] = 1e-9
+    std_wi[std_wi==0] = 1e-6
     stdperm = np.array(np.meshgrid(t_bw,t_wi)).T.reshape(-1,2)
     while len(stdperm) < nblocks:
         stdperm = np.concatenate((stdperm,stdperm))
